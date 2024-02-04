@@ -1,27 +1,26 @@
 const candidate = require("../models/candidate.model.js");
 const candidateRegistrationController = async (req, res) => {
   const {
-    chainID,
+    chainId,
     email,
     name,
     wardNo,
     description,
     party,
-    dob,
+    age,
     qualification,
     voterId,
     Adhaar,
   } = req.body;
   if (
-    chainID &&
+    chainId &&
     name &&
     partyName &&
     description &&
     wardNo &&
-    candidateName &&
     email &&
     party &&
-    dob &&
+    age &&
     qualification &&
     voterId
   ) {
@@ -30,13 +29,13 @@ const candidateRegistrationController = async (req, res) => {
       return res.status(400).json({ message: "Candidate already exists." });
     }
     const payload = {
-      chainID,
+      chainId,
       email,
       name,
       wardNo,
       description,
       party,
-      dob,
+      age,
       qualification,
       voterId,
       Adhaar,
