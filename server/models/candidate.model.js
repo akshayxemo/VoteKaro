@@ -26,9 +26,9 @@ const schema = new mongoose.Schema({
     type: String,
     required: [true, "Must provide party name."],
   },
-  dob: {
-    type: String,
-    required: [true, "Must provide Date of Birth"],
+  age: {
+    type: Number,
+    required: [true, "Must provide age"],
   },
   qualification: {
     type: String,
@@ -39,7 +39,7 @@ const schema = new mongoose.Schema({
     required: [true, "Must provide Voter ID"],
     unique: true,
   },
-  Adhaar: {
+  adhaar: {
     type: String,
     unique: true,
   },

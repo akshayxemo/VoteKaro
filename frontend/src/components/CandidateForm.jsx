@@ -1,80 +1,94 @@
-import { Web3Button, useContract, useContractWrite } from "@thirdweb-dev/react";
+import {
+  Web3Button,
+  useContract,
+  useContractWrite,
+  useContractRead,
+} from "@thirdweb-dev/react";
 import { CONTRACT_ADDRESS } from "../../constants/address";
 import { useState } from "react";
 import axios from "axios";
 
 const CandidateForm = () => {
   const Initialform = {
-    chainId: "",
+    chainId: 0,
     name: "",
     email: "",
-    wordNo: "",
+    wardNo: "",
     description: "",
     party: "",
-    age: "",
+    age: 0,
     qualification: "",
     voterId: "",
     adhaar: "",
   };
   const [form, setForm] = useState(Initialform);
+  const [formError, setFormError] = useState(false);
   const { contract } = useContract(CONTRACT_ADDRESS);
-  const { mutateAsync: addCandidate, isLoading } = useContractWrite(
-    contract,
-    "addCandidate"
-  );
+  const { mutateAsync } = useContractWrite(contract, "addCandidate");
+  const { data } = useContractRead(contract, "candidatesCount");
 
   const handleInputChange = (e) => {
+    setFormError(false);
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const call = async () => {
-    try {
-      if (validateForm) {
-        const data = await addCandidate({
-          args: [form.name, form.party, form.age, form.qualification],
-        });
-        console.info("contract call successs", data);
-      } else {
-        alert("please fill up the form");
-      }
-    } catch (err) {
-      console.error("contract call failure", err);
-    }
-  };
-
   const validateForm = () => {
-    return (
-      form.name.trim() !== "" &&
+    return form.name.trim() !== "" &&
       form.email.trim() !== "" &&
-      form.wordNo.trim() !== "" &&
+      form.wardNo.trim() !== "" &&
       form.description.trim() !== "" &&
       form.party.trim() !== "" &&
-      form.age.trim() !== "" &&
+      form.age > 18 &&
       form.qualification.trim() !== "" &&
       form.voterId.trim() !== "" &&
       form.adhaar.trim() !== ""
-    );
+      ? true
+      : false;
+  };
+
+  const validateTransctionData = () => {
+    return form.name.trim() !== "" &&
+      form.party.trim() !== "" &&
+      form.age > 18 &&
+      form.qualification.trim() !== ""
+      ? true
+      : false;
   };
 
   const handleSubmit = async () => {
-    const { data, isLoading } = useContractRead(contract, "candidatesCount");
-    if (!isLoading) {
-      setForm({ ...formData, chainId: data.toNumber() });
+    // e.preventDefault();
+    console.log("submission" + data.toNumber());
+    if (validateForm()) {
+      console.log("Form submitted with data:", form);
+      const No = data.toNumber();
+      setForm({ ...form, chainId: No });
       console.log(form);
       await axios
-        .post(import.meta.env.VITE_API_URL + "/registration", form)
+        .post(import.meta.env.VITE_API + "/registration", form)
         .then((response) => {
+          setForm(Initialform);
           console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
-          setSubmitError(error.response.data.message);
+          // setSubmitError(error.response.data.message);
         });
+    } else {
+      setFormError(true);
     }
   };
+
+  // const handleExternalButtonClick = () => {
+  //   // Trigger form submission when the external button is clicked
+  //   document.getElementById("candidateForm").submit();
+  // };
   return (
     <>
-      <form className="w-full max-w-lg">
+      <form
+        className="w-full max-w-lg"
+        // id="candidateForm"
+        // onSubmit={handleSubmit}
+      >
         <h1 className="text-2xl font-bold mb-6 font-Main">Candidate Entry</h1>
         <div className="flex flex-wrap -mx-3 mb-2">
           <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
@@ -83,11 +97,11 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-              id="grid-first-name"
               type="text"
               name="name"
               placeholder="Jane Doe"
               onChange={handleInputChange}
+              value={form.name}
             />
             {/* <p className="text-red-500 text-xs italic">
               Please fill out this field.
@@ -99,11 +113,11 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="grid-last-name"
               type="email"
               name="email"
               placeholder="abc@gmail.com"
               onChange={handleInputChange}
+              value={form.email}
             />
           </div>
         </div>
@@ -114,10 +128,11 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-              id="grid-first-name"
               type="text"
-              name="wordNo"
+              name="wardNo"
               placeholder=""
+              onChange={handleInputChange}
+              value={form.wardNo}
             />
             {/* <p className="text-red-500 text-xs italic">
               Please fill out this field.
@@ -129,10 +144,11 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="grid-last-name"
               type="text"
               name="description"
               placeholder="(optional)"
+              onChange={handleInputChange}
+              value={form.description}
             />
           </div>
         </div>
@@ -144,10 +160,11 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-              id="grid-first-name"
               type="text"
               name="party"
               placeholder=""
+              onChange={handleInputChange}
+              value={form.party}
             />
             {/* <p className="text-red-500 text-xs italic">
               Please fill out this field.
@@ -159,10 +176,11 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="grid-last-name"
-              type="text"
+              type="number"
               name="age"
               placeholder=""
+              onChange={handleInputChange}
+              value={form.age}
             />
           </div>
         </div>
@@ -173,10 +191,11 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-              id="grid-first-name"
               type="text"
               name="qualification"
               placeholder=""
+              onChange={handleInputChange}
+              value={form.qualification}
             />
             {/* <p className="text-red-500 text-xs italic">
               Please fill out this field.
@@ -188,10 +207,11 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="grid-last-name"
               type="text"
               name="voterId"
               placeholder=""
+              onChange={handleInputChange}
+              value={form.voterId}
             />
           </div>
         </div>
@@ -203,29 +223,55 @@ const CandidateForm = () => {
             </label>
             <input
               className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="grid-password"
               name="adhaar"
               type="text"
               placeholder="000-000-000"
+              onChange={handleInputChange}
+              value={form.adhaar}
             />
-            {/* <p className="text-gray-600 text-xs italic">
-              Make it as long and as crazy as you'd like
-            </p> */}
+            {formError && (
+              <p className=" text-xs italic text-red-500">
+                Make Sure to fill up everything
+              </p>
+            )}
           </div>
         </div>
-
-        <div className="flex flex-wrap justify-center items-center">
-          <Web3Button
-            contractAddress={CONTRACT_ADDRESS}
-            action={call}
-            onError={(error) => alert(error)}
-            onSuccess={handleSubmit}
-          >
-            {" "}
-            Register{" "}
-          </Web3Button>
-        </div>
+        {/* <button type="submit">Submit</button> */}
       </form>
+      <div className="flex flex-wrap justify-center items-center">
+        <Web3Button
+          contractAddress="0x1bf104aA91baAA21dB46468BC5F43C940Ad7A77D"
+          action={async () => {
+            if (validateForm()) {
+              // alert("valid");
+              console.log("valid");
+              await mutateAsync({
+                args: [form.name, form.party, form.age, form.qualification],
+              });
+            } else {
+              alert("invalid");
+              console.log("invalid");
+              alert("Form fields are not filled");
+              setFormError(true);
+            }
+            // contract.call("addCandidate", ["deas", "AJC", 24, "MCA"]);
+          }}
+          onError={(error) => alert(error)}
+          onSubmit={() => {
+            console.log("Transaction submitted");
+          }}
+          onSuccess={async () => {
+            console.log("success");
+            // handleExternalButtonClick();
+            handleSubmit();
+            // if (!isLoading) {
+            // }
+          }}
+        >
+          {" "}
+          Register{" "}
+        </Web3Button>
+      </div>
     </>
   );
 };

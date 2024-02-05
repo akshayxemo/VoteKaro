@@ -24,9 +24,9 @@ const AdminAuth = () => {
       setFormError("");
       setSubmitError("");
       //   setIsLoading(true);
-      console.log(import.meta.env.VITE_API_URL + "/admin/login");
+      console.log(import.meta.env.VITE_API + "/admin/login");
       await axios
-        .post(import.meta.env.VITE_API_URL + "/admin/login", formData)
+        .post(import.meta.env.VITE_API + "/admin/login", formData)
         .then((response) => {
           // Handle successful response
           setFormData(initialFormData);
@@ -73,7 +73,7 @@ const AdminAuth = () => {
                 name="emailId"
                 type="email"
                 placeholder="email"
-                value={formData.email}
+                value={formData.emailId}
                 onChange={handleInputChange}
               />
             </div>

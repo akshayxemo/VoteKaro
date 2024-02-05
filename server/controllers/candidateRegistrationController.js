@@ -10,19 +10,21 @@ const candidateRegistrationController = async (req, res) => {
     age,
     qualification,
     voterId,
-    Adhaar,
+    adhaar,
   } = req.body;
+
+  console.log(req.body);
   if (
-    chainId &&
-    name &&
-    partyName &&
-    description &&
-    wardNo &&
-    email &&
-    party &&
-    age &&
-    qualification &&
-    voterId
+    chainId !== 0 &&
+    name !== "" &&
+    email !== "" &&
+    wardNo !== "" &&
+    description !== "" &&
+    party !== "" &&
+    age !== 0 &&
+    qualification !== "" &&
+    voterId !== "" &&
+    adhaar !== ""
   ) {
     const findCandidate = await candidate.findOne({ email });
     if (findCandidate) {
@@ -38,7 +40,7 @@ const candidateRegistrationController = async (req, res) => {
       age,
       qualification,
       voterId,
-      Adhaar,
+      adhaar,
     };
     await candidate.create(payload);
     return res.status(201).json({ success: true, message: "Candidate added." });
